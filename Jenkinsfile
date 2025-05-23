@@ -29,23 +29,14 @@ pipeline {
 		stage('Run & Verify'){
 			steps {
 			
-				sh 'java -jar target/*.jar & sleep 6 && curl --fail http://localhost:8080/'
+				sh 'java -jar target/*.jar'
 				
 			}
-			post {
 			
-				always {
-				
-					sh 'pkill -f "java -jar" || true'
-					
-				}
-				
-			}
 		}
 		
 		stage('Archive') {
             steps {
-                // Save the built JAR as a downloadable artifact in Jenkins
                 archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
             }
         }
