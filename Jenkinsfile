@@ -32,6 +32,12 @@ pipeline {
 				sh 'java -jar target/*.jar'
 				
 			}
+			 post {
+                always {
+                    // Kill any java process to clean up
+                    sh 'pkill -f "java -jar" || true'
+                }
+            }
 			
 		}
 		
