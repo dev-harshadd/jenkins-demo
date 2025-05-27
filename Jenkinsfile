@@ -39,13 +39,21 @@ pipeline {
             }
         }
 
-        stage('Run Docker Container') {
-            steps {
-                script {
-                    sh "docker run -d -p 8080:8080 --name spring-app $DOCKER_IMAGE"
+        stage('Docker Run') {
+                steps {
+                    script {
+                    // Stop and remove previous if it exists
+                    sh '''
+                    docker stop spring-app || true
+                    docker rm spring-app || true
+                    '''
+
+                    // Run on different host port if needed
+                    sh 'docker run -d -p 9090:8080 --name spring-app harshadbhandare/springboot-tomcat-app'
+                    }
                 }
             }
-        }
+
 
         stage('Archive') {
             steps {
