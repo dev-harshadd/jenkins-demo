@@ -26,20 +26,23 @@ pipeline {
 		}
 		
 		
-		stage('Run & Verify'){
-			steps {
-			
-				sh 'java -jar target/*.jar'
-				
-			}
-			 post {
-                always {
-                    // Kill any java process to clean up
-                    sh 'pkill -f "java -jar" || true'
-                }
-            }
-			
-		}
+	   stage('Run & Verify'){
+	  		 steps {
+	        		// Start app in background
+	       			 sh 'nohup java -jar target/*.jar > app.log 2>&1 & echo $! > app.pid'
+	
+			        // Wait for app to start (adjust sleep as needed)
+			        sh 'sleep 10'
+	     
+	            }
+	    post {
+	        always {
+	            // Kill the background process using PID
+	            sh 'kill $(cat app.pid) || true'
+	        }
+	    }
+	}
+
 		
 		stage('Archive') {
             steps {
