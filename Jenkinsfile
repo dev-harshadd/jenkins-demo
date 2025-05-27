@@ -1,65 +1,65 @@
 pipeline {
-	agent any
-	
-	
-	tools{
-		maven 'Maven_3.9.9'
-		jdk 'JDK 17'
-	}
-	
-	
-	stages {
-		stage('Checkout'){
-			steps{
-				checkout scm
-			}
-			
-		}
-		
-		
-		stage('Build'){
-			steps{
-			
-			  sh 'mvn clean install'
-			  
-			}
-		}
-		
-		
-	   stage('Run & Verify'){
-	  		 steps {
-	        		// Start app in background
-	       			 sh 'nohup java -jar target/*.jar > app.log 2>&1 & echo $! > app.pid'
-	
-			        // Wait for app to start (adjust sleep as needed)
-			        sh 'sleep 10'
-	     
-	            }
-	    post {
-	        always {
-	            // Kill the background process using PID
-	            sh 'kill $(cat app.pid) || true'
-	        }
-	    }
-	}
+    agent any
 
-		
-		stage('Archive') {
+    tools {
+        maven 'Maven_3.9.9'
+        jdk 'JDK 17'
+    }
+
+    environment {
+        DOCKER_IMAGE = 'harshadbhandare/springboot-tomcat-app'
+    }
+
+    stages {
+        stage('Checkout') {
             steps {
-                archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+                checkout scm
             }
         }
-        
-       }
-		
-		post {
-			success { echo 'pipeline completed successfully' }
-			failure { echo 'pipeline failed-check the logs' }
-			
-		}
-	}
-			
-		
-		
-	
-		
+
+        stage('Build WAR') {
+            steps {
+                sh 'mvn clean install -DskipTests'
+            }
+        }
+
+        stage('Clean Previous Containers') {
+            steps {
+                script {
+                    sh "docker rm -f spring-app || true"
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    sh "docker build -t $DOCKER_IMAGE ."
+                }
+            }
+        }
+
+        stage('Run Docker Container') {
+            steps {
+                script {
+                    sh "docker run -d -p 8080:8080 --name spring-app $DOCKER_IMAGE"
+                }
+            }
+        }
+
+        stage('Archive') {
+            steps {
+                archiveArtifacts artifacts: 'target/*.war', fingerprint: true
+            }
+        }
+    }
+
+    post {
+        success {
+            echo 'Pipeline completed successfully with Docker and Tomcat'
+        }
+        failure {
+            echo 'Pipeline failed. Check logs.'
+        }
+    }
+}
