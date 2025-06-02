@@ -1,5 +1,5 @@
 # Use official Tomcat image as base
-FROM openJdk:17-jre-slim
+FROM openjdk:17-jdk-slim
 
 WORKDIR /app
 # Copy your WAR file and rename it to ROOT.war (so it deploys on "/")
