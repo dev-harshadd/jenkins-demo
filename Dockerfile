@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 
-WORKDIR /app
+WORKDIR /jenkinsDemo.py
 
-copy /app.py .
+COPY jenkinsDemo.py .
 
-CMD ["python", "app.py"]
+CMD ["python", "jenkinsDemo.py"]
