@@ -1,29 +1,23 @@
 pipeline {
-  agent any
+    agent any
 
-  stages {
-    stage('Pull Code Harshad') {
-      steps{
-        git branch: 'main', url: 'https://github.com/dev-harshadd/jenkins-demo'
-      }
-    }
-
-    stage('BUild Docker Image'){
-      steps{
-        script{
-          docker.build('harshad-python-app')
+    stages {
+        stage('Pull Code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/dev-harshadd/jenkins-demo'
+            }
         }
-      }
-    }
 
-    stage('Run Container'){
-      steps{
-        script{
-          docker.image('harshad-python-app').run();
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t harshad-python-app .'
+            }
         }
-      }
+
+        stage('Run Container') {
+            steps {
+                sh 'docker run --rm harshad-python-app'
+            }
+        }
     }
-  }
 }
-
-  
